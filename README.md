@@ -111,6 +111,14 @@ Follow commit message conventions and add tests for new logic.
 ## License
 MIT — update LICENSE file as needed.
 
-Contact/notes:
-- Replace placeholders (routing, styling choices, API endpoints) with concrete project details.
-- Update scripts and commands to match the chosen build tool (Vite/CRA/Next.js).
+initial release:
+- feat: Add Login, Regenerate OTP, Verify OTP, and Welcome pages
+
+- Implemented LoginPage with security question handling and error management.
+- Created RegenerateOTPPage for generating new OTPs with email input.
+- Developed VerifyOTPPage for OTP verification and resending OTP functionality.
+- Added WelcomePage for navigation to login and registration.
+- Introduced polyfills for Buffer, process, and crypto for compatibility.
+- Set up websocketManager for handling WebSocket connections and subscriptions.
+- Created websocketService for managing WebSocket client creation and presence updates.
+- Configured Tailwind CSS and Vite for styling and build processes.
