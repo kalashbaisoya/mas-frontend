@@ -16,11 +16,32 @@ const DocumentsModal = ({
   isLocked = true, // add this prop from parent (defaulting to Locked)
 }) => {
   const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const [captureLoading, setCaptureLoading] = useState(false);
 
   const handleAuthenticateClick = () => {
     console.log("Authenticate clicked");
     setShowAuthPopup(true);
     if (onAuthenticate) onAuthenticate(groupId);
+  };
+
+  const handleCapture = async () => {
+    try {
+      setCaptureLoading(true);
+
+      const response = await fetch("http://localhost:5000/capture", {
+        method: "GET",
+      });
+
+      if (response.status === 200) {
+        setShowAuthPopup(false);
+      } else {
+        console.error("Capture failed. Status:", response.status);
+      }
+    } catch (err) {
+      console.error("Capture error:", err);
+    } finally {
+      setCaptureLoading(false);
+    }
   };
 
   return (
@@ -137,22 +158,23 @@ const DocumentsModal = ({
         </div>
       </div>
 
-      {/* Auth popup (rendered as sibling with higher z-index) */}
+      {/* Auth popup */}
       {showAuthPopup && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center">
           <button
             type="button"
             aria-label="Close authentication popup"
             className="absolute inset-0 bg-black bg-opacity-50"
-            onClick={() => setShowAuthPopup(false)}
+            onClick={() => (captureLoading ? null : setShowAuthPopup(false))}
           />
 
           <div className="relative bg-white rounded-xl shadow-lg w-[90vw] max-w-sm p-6">
             <button
               type="button"
-              onClick={() => setShowAuthPopup(false)}
+              onClick={() => (captureLoading ? null : setShowAuthPopup(false))}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
               aria-label="Close"
+              disabled={captureLoading}
             >
               ✕
             </button>
@@ -182,10 +204,11 @@ const DocumentsModal = ({
 
               <button
                 type="button"
-                onClick={() => setShowAuthPopup(false)}
-                className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+                onClick={handleCapture}
+                disabled={captureLoading}
+                className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Close
+                {captureLoading ? "Capturing..." : "Capture"}
               </button>
             </div>
           </div>
