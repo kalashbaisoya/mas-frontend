@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const DocumentsModal = ({
   groupId,
@@ -12,19 +12,37 @@ const DocumentsModal = ({
   onUpload,
   onDownload,
   loading,
+  isLocked = true,
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
       <div className="bg-white rounded-lg p-6 max-w-3xl min-w-[300px] w-[95vw] max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">
-          Documents for {groupName}
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Documents for {groupName}
+          </h2>
+
+          <span className="text-sm text-gray-700">
+            Status:{" "}
+            <span className="font-semibold">
+              {isLocked ? "Locked" : "Unlocked"}
+            </span>
+          </span>
+        </div>
 
         <div className="mb-4">
           <h3 className="text-lg font-medium mb-2">Upload New Document</h3>
           <div className="flex flex-col space-y-2">
-            <input type="file" onChange={onFileChange} className="border rounded p-2 text-sm" />
-            <select value={accessType} onChange={(e) => setAccessType(e.target.value)} className="border rounded p-2 text-sm">
+            <input
+              type="file"
+              onChange={onFileChange}
+              className="border rounded p-2 text-sm"
+            />
+            <select
+              value={accessType}
+              onChange={(e) => setAccessType(e.target.value)}
+              className="border rounded p-2 text-sm"
+            >
               <option value="READ">Read</option>
               <option value="WRITE">Write</option>
             </select>
@@ -42,22 +60,37 @@ const DocumentsModal = ({
           <table className="w-full border-collapse bg-white shadow-sm rounded-lg">
             <thead>
               <tr className="bg-gray-200">
-                <th className="p-2 text-left text-gray-700 text-sm font-medium">File Name</th>
-                <th className="p-2 text-left text-gray-700 text-sm font-medium">File Type</th>
-                <th className="p-2 text-left text-gray-700 text-sm font-medium">Access Type</th>
-                <th className="p-2 text-left text-gray-700 text-sm font-medium">Actions</th>
+                <th className="p-2 text-left text-gray-700 text-sm font-medium">
+                  File Name
+                </th>
+                <th className="p-2 text-left text-gray-700 text-sm font-medium">
+                  File Type
+                </th>
+                <th className="p-2 text-left text-gray-700 text-sm font-medium">
+                  Access Type
+                </th>
+                <th className="p-2 text-left text-gray-700 text-sm font-medium">
+                  Actions
+                </th>
               </tr>
             </thead>
+
             <tbody>
               {documentsList.map((doc) => (
                 <tr key={doc.documentId} className="hover:bg-gray-50">
-                  <td className="p-2 border-t text-sm truncate max-w-[200px]">{doc.fileName}</td>
+                  <td className="p-2 border-t text-sm truncate max-w-[200px]">
+                    {doc.fileName}
+                  </td>
                   <td className="p-2 border-t text-sm">{doc.fileType}</td>
                   <td className="p-2 border-t text-sm">{doc.accessType}</td>
                   <td className="p-2 border-t">
                     <button
-                      onClick={() => onDownload(doc.documentId)}
-                      className="px-2 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                      disabled={isLocked}
+                      onClick={() => {
+                        if (!isLocked) onDownload(doc.documentId);
+                      }}
+                      className="px-2 py-1 bg-blue-500 text-white text-sm rounded-lg transition-colors
+                                 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
                     >
                       Download
                     </button>
@@ -68,7 +101,9 @@ const DocumentsModal = ({
           </table>
         </div>
 
-        {documentsList.length === 0 && <p className="mt-4 text-gray-600">No documents found for this group.</p>}
+        {documentsList.length === 0 && (
+          <p className="mt-4 text-gray-600">No documents found for this group.</p>
+        )}
 
         <div className="mt-4 flex justify-end">
           <button

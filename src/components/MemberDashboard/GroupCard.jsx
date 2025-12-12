@@ -40,7 +40,7 @@ const GroupCard = ({ group, pendingCount, onViewMembers, onViewDocuments, onRequ
           View Members
         </button>
         <button onClick={onViewDocuments} className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
-          Manage Documents
+          Access Documents
         </button>
         <button onClick={onRequestRemoval} className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
           Request Removal
