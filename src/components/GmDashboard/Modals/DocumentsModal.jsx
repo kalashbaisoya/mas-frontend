@@ -29,7 +29,7 @@ const DocumentsModal = ({
       setCaptureLoading(true);
 
       const response = await fetch("http://localhost:5000/capture", {
-        method: "POST",
+        method: "GET",
       });
 
       if (response.status === 200) {
