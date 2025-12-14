@@ -199,7 +199,7 @@ const UserDashboard = () => {
                 )}
               </div>
               <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium">Auth Type:</span> {group.groupAuthType}
+                <span className="font-medium">Group Type:</span> {group.groupAuthType}
               </p>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-medium">Manager:</span> {group.managerName}
@@ -334,7 +334,7 @@ const UserDashboard = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Auth Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Group Type</label>
                 <select
                   name="groupAuthType"
                   value={becomeManagerData.groupAuthType}
@@ -389,7 +389,7 @@ const UserDashboard = () => {
                 <thead>
                   <tr className="bg-gray-200">
                     <th className="p-2 text-left text-gray-700 text-sm font-medium">Group Name</th>
-                    <th className="p-2 text-left text-gray-700 text-sm font-medium">Auth Type</th>
+                    <th className="p-2 text-left text-gray-700 text-sm font-medium">Group Type</th>
                     <th className="p-2 text-left text-gray-700 text-sm font-medium">Email</th>
                     <th className="p-2 text-left text-gray-700 text-sm font-medium">Description</th>
                     <th className="p-2 text-left text-gray-700 text-sm font-medium">Status</th>

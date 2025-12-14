@@ -114,7 +114,7 @@ const [newManagerId, setNewManagerId] = useState('');
     
     // ✅ VALIDATE ALL 3 FIELDS
     if (!createForm.groupName.trim() || !createForm.groupAuthType || !createForm.managerId) {
-      setError('Please fill all fields: Group Name, Auth Type, and Manager');
+      setError('Please fill all fields: Group Name, Type, and Manager');
       return;
     }
     
@@ -248,10 +248,10 @@ const handleReplaceManager = useCallback(async (groupId, newManagerId) => {
   // =====================================================
   const getAuthTypeBadge = (authType) => {
     const badges = {
-      'A': { color: 'bg-green-100 text-green-800', label: 'Auth A' },
-      'B': { color: 'bg-blue-100 text-blue-800', label: 'Auth B' },
-      'C': { color: 'bg-purple-100 text-purple-800', label: 'Auth C' },
-      'D': { color: 'bg-orange-100 text-orange-800', label: 'Auth D' }
+      'A': { color: 'bg-green-100 text-green-800', label: 'A' },
+      'B': { color: 'bg-blue-100 text-blue-800', label: 'B' },
+      'C': { color: 'bg-purple-100 text-purple-800', label: 'C' },
+      'D': { color: 'bg-orange-100 text-orange-800', label: 'D' }
     };
     return badges[authType] || { color: 'bg-gray-100 text-gray-800', label: 'Unknown' };
   };
@@ -343,7 +343,7 @@ const handleReplaceManager = useCallback(async (groupId, newManagerId) => {
 
           {/* AUTH TYPE */}
           <div className="lg:col-span-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Auth Type *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Type *</label>
             <select
               value={createForm.groupAuthType}
               onChange={(e) => setCreateForm({...createForm, groupAuthType: e.target.value})}
@@ -351,11 +351,11 @@ const handleReplaceManager = useCallback(async (groupId, newManagerId) => {
               disabled={isCreating || isLoadingManagers}
               required
             >
-              <option value="">Select Auth Type</option>
-              <option value="A">🔐 Auth Type A</option>
-              <option value="B">🔐 Auth Type B</option>
-              <option value="C">🔐 Auth Type C</option>
-              <option value="D">🔐 Auth Type D</option>
+              <option value="">Select Type</option>
+              <option value="A">🔐 Type A</option>
+              <option value="B">🔐 Type B</option>
+              <option value="C">🔐 Type C</option>
+              <option value="D">🔐 Type D</option>
             </select>
           </div>
 
@@ -512,7 +512,7 @@ const handleReplaceManager = useCallback(async (groupId, newManagerId) => {
                                 {request.status}
                             </span>
                             <span className={`px-3 py-1 ${authColor} text-xs font-semibold rounded-full`}>
-                                Auth {request.groupAuthType}
+                                Type {request.groupAuthType}
                             </span>
                             </div>
                         </div>
@@ -604,7 +604,7 @@ const handleReplaceManager = useCallback(async (groupId, newManagerId) => {
                         <div className="flex items-center gap-4 mb-6 pb-4 border-b-2 border-gray-100">
                         <div className={`w-3 h-3 rounded-full ${badge.color.replace('text-', 'bg-')}`}></div>
                         <h3 className="text-2xl font-bold text-gray-900">
-                            Group Auth Type: {badge.label}
+                            Group Type: {badge.label}
                         </h3>
                         <div className="ml-auto text-sm text-gray-500 font-medium">
                             {authGroups.length} group{authGroups.length !== 1 ? 's' : ''}

@@ -410,7 +410,7 @@ export default MemberDashboard;
 //                 )}
 //               </div>
 //               <p className="text-sm text-gray-600 mb-1">
-//                 <span className="font-medium">Auth Type:</span> {group.groupAuthType}
+//                 <span className="font-medium">Group Type:</span> {group.groupAuthType}
 //               </p>
 //               <p className="text-sm text-gray-600 mb-1">
 //                 <span className="font-medium">Manager:</span> {group.managerName}
@@ -966,7 +966,7 @@ export default MemberDashboard;
 //                 )}
 //               </div>
 //               <p className="text-sm text-gray-600 mb-1">
-//                 <span className="font-medium">Auth Type:</span> {group.groupAuthType}
+//                 <span className="font-medium">Group Type:</span> {group.groupAuthType}
 //               </p>
 //               <p className="text-sm text-gray-600 mb-1">
 //                 <span className="font-medium">Manager:</span> {group.managerName}
@@ -1524,7 +1524,7 @@ export default MemberDashboard;
 //                 )}
 //               </div>
 //               <p className="text-sm text-gray-600 mb-1">
-//                 <span className="font-medium">Auth Type:</span> {group.groupAuthType}
+//                 <span className="font-medium">Group Type:</span> {group.groupAuthType}
 //               </p>
 //               <p className="text-sm text-gray-600 mb-1">
 //                 <span className="font-medium">Manager:</span> {group.managerName}

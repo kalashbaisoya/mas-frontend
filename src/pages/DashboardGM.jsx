@@ -585,7 +585,7 @@ export default GMDashboard;
 //                 )}
 //               </div>
 //               <p className="text-sm text-gray-600 mb-1">
-//                 <span className="font-medium">Auth Type:</span> {group.groupAuthType}
+//                 <span className="font-medium">Group Type:</span> {group.groupAuthType}
 //               </p>
 //               <p className="text-sm text-gray-600 mb-4">
 //                 <span className="font-medium">Created On:</span> {group.createdOn}
