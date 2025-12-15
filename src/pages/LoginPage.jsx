@@ -1,5 +1,5 @@
 import { useState , useEffect, useContext} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, getSecurityQuestions } from '../api/api';
 import Card from '../components/layout/Card';
 import Input from '../components/ui/Input';
@@ -15,10 +15,10 @@ function LoginPage() {
     const { securityQuestions, setSecurityQuestions } = useContext(RegistrationContext);
     const { setAuthData } = useContext(AuthContext);
 
-
+    const location = useLocation();
 
   const [formData, setFormData] = useState({
-    emailId: '',
+    emailId: location.state?.emailId || '',
     password: '',
     securityAnswerRequest: [
       { questionId: '', answer: '' }

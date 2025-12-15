@@ -1,5 +1,5 @@
 function Stepper({ step }) {
-  const steps = ['Register', 'Verify OTP', 'Login'];
+  const steps = ['Register','Capture Biometric','Verify OTP','Login'];
 
   return (
     <div className="flex justify-between mb-6">

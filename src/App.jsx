@@ -12,6 +12,7 @@ import UserDashboard from './pages/DashboardUser'
 import GroupManagerDashboard from './pages/DashboardGM'
 import MemberDashboard from './pages/DashboardMember';
 import TestAdminApi from './components/admin/TestAdminApi';
+import CaptureBiometric from './pages/CaptureBiometric';
 
 function App() {
   console.log("App loaded");
@@ -23,6 +24,7 @@ function App() {
           <Route path="/" element={<WelcomePage />} />
           <Route path="/register" element={<FormPage />} />
           <Route path="/verify-otp" element={<VerifyOTPPage />} />
+          <Route path="/capture" element={<CaptureBiometric />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/generate-otp" element={<RegenerateOTPPage />} />
           <Route path="/test-api" element={<TestAdminApi />} />

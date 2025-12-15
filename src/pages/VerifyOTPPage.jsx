@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { verifyOTP,generateAndSendOTP } from '../api/api';
 import Card from '../components/layout/Card';
 import Stepper from '../components/layout/Stepper';
@@ -9,13 +9,13 @@ import FormError from '../components/ui/FormError';
 import Spinner from '../components/ui/Spinner';
 
 function VerifyOTPPage() {
-  const [emailId, setEmailId] = useState('');
+  const location = useLocation();
+  const [emailId, setEmailId] = useState(location.state?.emailId || '');
   const [otpCode, setOtpCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const handleSubmit = async () => {
     if (!emailId || !otpCode) {
       setError('Please enter both email and OTP code');
@@ -27,7 +27,9 @@ function VerifyOTPPage() {
       const response = await verifyOTP(emailId, otpCode);
       setSuccess(response.data);
       setError('');
-      navigate('/login');
+      // navigate('/login');
+      navigate('/login', { state: { emailId } });
+
     } catch (err) {
       setError(err.response?.data?.message || 'OTP verification failed');
       setSuccess('');
@@ -57,7 +59,7 @@ function VerifyOTPPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <Card title="Verify OTP">
-        <Stepper step={2} />
+        <Stepper step={3} />
         {error && <FormError message={error} />}
         {success && <p className="text-green-500 text-center">{success}</p>}
         {loading && <Spinner />}

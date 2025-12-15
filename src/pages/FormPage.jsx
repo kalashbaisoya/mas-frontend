@@ -206,7 +206,7 @@ function FormPage() {
           </Button>
           <p className="text-center">
             Already have an account?{' '}
-            <span className="text-blue-500 cursor-pointer" onClick={() => navigate('/login')}>
+            <span className="text-blue-500 cursor-pointer" onClick={() => navigate('/capture', { state:  formData.emailId })}>
               Login
             </span>
           </p>
