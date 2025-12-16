@@ -2,8 +2,8 @@
 
 // import {
 //   connectWebSocket,
-// //   subscribeToGroup,
-// //   unsubscribeFromGroup,
+// //   subscribeToGroupPresence,
+// //   unsubscribeFromGroupPresence,
 //   disconnectWebSocket,
 // } from '../websocketManager';
 

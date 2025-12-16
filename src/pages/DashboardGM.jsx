@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, {  useEffect } from 'react';
 import useGmDashboard from '../hooks/useGmDashboard.js';
 import GroupCard from '../components/GmDashboard/GroupCard';
 import LoadingOverlay from '../components/GmDashboard/LoadingOverlay';
@@ -7,6 +8,7 @@ import AddMemberModal from '../components/GmDashboard/Modals/AddMemberModal';
 import MembersModal from '../components/GmDashboard/Modals/MembersModal';
 import RequestsModal from '../components/GmDashboard/Modals/RequestsModal';
 import DocumentsModal from '../components/GmDashboard/Modals/DocumentsModal.jsx';
+
 // Group Manager Dashboard with card-based UI, responsive modals, and tabbed requests
 
 const GMDashboard = () => {
@@ -32,11 +34,53 @@ const {
     handleDownloadDocument,handleFileChange,handleUploadDocument,
     handleRejectJoinRequest,handleRejectRemoveRequest,handleRemoveMember,
     handleSuspendMember,handleUnsuspendMember,
-    handleUserSelect,handleViewDetailsClick,handleViewDocumentsClick,handleViewRequestsClick,
+    handleUserSelect,handleViewDetailsClick,handleViewRequestsClick,
     hasPendingRequests,getPendingRequestsCount,segregateRequests,
     setViewDocumentsGroupId,setActiveJoinStatusTab,setActiveRemoveStatusTab,
     setActiveRequestTab,setSelectedGroupId,setViewDetailsGroupId,setViewRequestsGroupId,
+    authStateByGroup,
+
+    handleCreateAuthSession,
+    handleSignAuthSession,
+    checkGroupAccess,
+    handleUpdateAuthIntent,
+    cleanupAuthSubscription, handleViewDocumentsClick
   } = useGmDashboard() ;
+
+  useEffect(() => {
+  return () => {
+    if (viewDocumentsGroupId) {
+      handleUpdateAuthIntent(viewDocumentsGroupId, false);
+      cleanupAuthSubscription(viewDocumentsGroupId);
+    }
+  };
+}, [viewDocumentsGroupId]);
+
+
+  const handleOpenDocuments = async (groupId) => {
+    try {
+      // Step 1: Opt-in to auth intent
+      await handleUpdateAuthIntent(groupId, true);
+
+      // Step 2: Create the auth session immediately
+      // const session = await handleCreateAuthSession(groupId);
+
+      // Step 3: Open the modal
+      setViewDocumentsGroupId(groupId);
+    } catch (err) {
+      console.error("Failed to initialize document access", err);
+      alert("Failed to start authentication. Please try again.");
+    }
+  };
+
+  const handleCloseDocuments = async (groupId) => {
+    if (groupId) {
+      await handleUpdateAuthIntent(groupId, false);
+      cleanupAuthSubscription(viewDocumentsGroupId);
+    }
+    setViewDocumentsGroupId(null);
+  };
+
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -58,7 +102,7 @@ const {
               onAddMembers={() => handleAddMemberClick(group.groupId)}
               onViewDetails={() => handleViewDetailsClick(group.groupId)}
               onViewRequests={() => handleViewRequestsClick(group.groupId)}
-              onManageDocuments={() => handleViewDocumentsClick(group.groupId)}
+              onManageDocuments={() => handleOpenDocuments(group.groupId)}
             />
           ))}
         </div> 
@@ -122,12 +166,20 @@ const {
         <DocumentsModal
           groupId={viewDocumentsGroupId}
           documentsList={documents[viewDocumentsGroupId] || []}
-          groupName={groups.find((g) => g.groupId === viewDocumentsGroupId)?.groupName}
-          onClose={() => setViewDocumentsGroupId(null)}
+          groupName={groups.find(g => g.groupId === viewDocumentsGroupId)?.groupName}
+
+          authState={authStateByGroup[viewDocumentsGroupId]}
+
+          onCreateAuthSession={handleCreateAuthSession}
+          onSignAuthSession={handleSignAuthSession}
+          checkGroupAccess={checkGroupAccess}
+
+          onFetchDocuments={handleViewDocumentsClick}
+          onClose={handleCloseDocuments}
           file={file}
           accessType={accessType}
           onFileChange={handleFileChange}
-          setAccessType={(v) => {} /* hook doesn't expose setter; keep if you add one */}
+          // setAccessType={setAccessType}
           onUpload={handleUploadDocument}
           onDownload={handleDownloadDocument}
           loading={loading}

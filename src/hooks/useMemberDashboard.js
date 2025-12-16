@@ -13,8 +13,8 @@ import { AuthContext } from '../contexts/AuthContext';
 import { createWebSocketClient } from '../websocketService';
 import {
   connectWebSocket,
-  subscribeToGroup,
-  unsubscribeFromGroup,
+  subscribeToGroupPresence,
+  unsubscribeFromGroupPresence,
   disconnectWebSocket,
 } from '../websocketManager';
 
@@ -162,7 +162,7 @@ useEffect(() => {
     setPresenceByGroup((prev)=> ({...prev,[groupId]:response.data}));
 
     // ✅ Subscribe for presence updates for this group
-    subscribeToGroup(groupId, (gid, presenceUpdate) => {
+    subscribeToGroupPresence(groupId, (gid, presenceUpdate) => {
       setPresenceByGroup((prev) => 
         ({...prev,[gid]: presenceUpdate,}));
       });

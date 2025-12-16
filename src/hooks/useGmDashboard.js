@@ -16,15 +16,17 @@ import {
   rejectRemoveRequest,
   viewAllDocumentsByGroupId,
   downloadDocument,
-  uploadDocument, viewMyMembershipsGroupDetails,viewMembershipStatusesByGroup
+  uploadDocument, viewMyMembershipsGroupDetails,viewMembershipStatusesByGroup,
+  createAuthSession,signAuthSession,isGroupAccessAllowed,updateAuthIntent
 } from '../api/gmApi'; // Updated import to include document APIs
-
+  import { captureBiometric } from '../api/api.js';
 
 import {
   connectWebSocket,
-  subscribeToGroup,
-  unsubscribeFromGroup,
+  subscribeToGroupPresence,
+  unsubscribeFromGroupPresence,
   disconnectWebSocket,
+  subscribeToGroupAuthState, unsubscribeFromGroupAuthState
 } from '../websocketManager';
 
 const useGmDashboard = () => {
@@ -49,6 +51,10 @@ const useGmDashboard = () => {
   const [accessType, setAccessType] = useState('READ'); // Default access type for upload
 
   const [presenceByGroup, setPresenceByGroup] = useState({});
+    // 🔐 Auth session state per group
+  const [authStateByGroup, setAuthStateByGroup] = useState({});
+
+
 
   useEffect(() => {
         const token = localStorage.getItem('token');
@@ -78,7 +84,7 @@ const useGmDashboard = () => {
         for (const group of userGroups) {
           await Promise.all([
             fetchRequests(group.groupId),
-            fetchDocuments(group.groupId),
+            // fetchDocuments(group.groupId),
           ]);
         }
         setError(null);
@@ -91,6 +97,146 @@ const useGmDashboard = () => {
     };
     if (authData?.user?.userId) fetchGroups();
   }, [authData]);
+
+    const handleSignAuthSession = async (sessionId) => {
+      console.group("🔐 handleSignAuthSession");
+      console.log("▶ sessionId:", sessionId);
+
+      try {
+        setLoading(true);
+
+        // -----------------------------
+        // Step 0: Validate sessionId
+        // -----------------------------
+        if (!sessionId) {
+          throw new Error("Missing sessionId");
+        }
+
+        // -----------------------------
+        // Step 1: Capture biometric
+        // -----------------------------
+        console.log("🧬 Capturing biometric...");
+
+        const bioResponse = await captureBiometric();
+
+        console.log("🧬 Biometric raw response:", {
+          status: bioResponse?.status,
+          keys: Object.keys(bioResponse?.data || {}),
+        });
+
+        const biometricTemplateBase64 =
+          bioResponse?.data?.template;
+
+        if (!biometricTemplateBase64) {
+          console.error("❌ biometricTemplateBase64 missing", bioResponse?.data);
+          throw new Error("Biometric capture failed");
+        }
+
+        console.log(
+          "✅ Biometric captured (length):",
+          biometricTemplateBase64.length
+        );
+
+        // -----------------------------
+        // Step 2: Sign authentication session
+        // -----------------------------
+        console.log("🔐 Signing authentication session...");
+        const payload = {
+          biometricTemplateBase64: biometricTemplateBase64,
+        };
+        const signResponse = await signAuthSession(sessionId,payload);
+
+        console.log("✅ Authentication Response:",signResponse?.data);
+
+        if (!signData) {
+          throw new Error("Empty sign response");
+        }
+
+        // ✅ STORE AUTH STATE PER GROUP
+        setAuthStateByGroup((prev) => ({
+          ...prev,
+          [groupId]: {
+            ...prev[groupId],
+            ...signData,              // sessionStatus, verifiedCount, etc.
+          },
+        }));
+
+      } catch (err) {
+        console.error("❌ handleSignAuthSession error:", err);
+
+        setError(
+          err?.response?.data?.message ||
+          err?.message ||
+          "Authentication failed"
+        );
+      } finally {
+        setLoading(false);
+        console.groupEnd();
+      }
+    };
+
+
+    const handleCreateAuthSession = async (groupId, authType) => {
+      try {
+        setLoading(true);
+        const response = await createAuthSession(groupId);
+
+        alert('Auth session created');
+
+        // Subscribe to live auth-state updates (except TYPE_A)
+        if (authType !== 'TYPE_A') {
+          subscribeToGroupAuthState(groupId, (payload) => {
+            setAuthStateByGroup((prev) => ({
+              ...prev,
+              [groupId]: payload,
+            }));
+          });
+        }
+
+        return response.data;
+      } catch (err) {
+        console.error(err);
+        setError('Failed to create auth session');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleUpdateAuthIntent = async (sessionId, intent) => {
+      try {
+        setLoading(true);
+        await updateAuthIntent(sessionId, intent); // ALLOW / DENY
+      } catch (err) {
+        console.error(err);
+        setError('Failed to update auth intent');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const checkGroupAccess = async (groupId) => {
+      try {
+        const response = await isGroupAccessAllowed(groupId);
+        return response.data; // true / false
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    };
+
+    const cleanupAuthSubscription = (groupId) => {
+      unsubscribeFromGroupAuthState(groupId);
+      setAuthStateByGroup((prev) => {
+        const copy = { ...prev };
+        delete copy[groupId];
+        return copy;
+      });
+    };
+
+
+
+
+
 
   // Fetch verified users for add member modal, excluding existing group members
   const fetchUsers = async (groupId) => {
@@ -213,7 +359,7 @@ const useGmDashboard = () => {
     setPresenceByGroup((prev)=> ({...prev,[groupId]:response.data}));
     
     // ✅ Subscribe for presence updates for this group
-        subscribeToGroup(groupId, (gid, presenceUpdate) => {
+        subscribeToGroupPresence(groupId, (gid, presenceUpdate) => {
           setPresenceByGroup((prev) => 
             ({...prev,[gid]: presenceUpdate,}));
           });
@@ -445,11 +591,18 @@ const useGmDashboard = () => {
     handleDownloadDocument,handleUploadDocument,handleFileChange,
     
     handleSuspendMember,handleUnsuspendMember,
-    handleUserSelect,handleViewDetailsClick,handleViewDocumentsClick,handleViewRequestsClick,
+    handleUserSelect,handleViewDetailsClick,handleViewRequestsClick,
     hasPendingRequests,getPendingRequestsCount,
     segregateRequests,
     setViewDocumentsGroupId,setActiveJoinStatusTab,setActiveRemoveStatusTab,
-    setActiveRequestTab,setSelectedGroupId,setViewDetailsGroupId,setViewRequestsGroupId,presenceByGroup
+    setActiveRequestTab,setSelectedGroupId,setViewDetailsGroupId,setViewRequestsGroupId,presenceByGroup,
+    authStateByGroup,
+
+    handleCreateAuthSession,
+    handleSignAuthSession,
+    handleUpdateAuthIntent,
+    checkGroupAccess,
+    cleanupAuthSubscription, handleViewDocumentsClick
   };
 };
 

@@ -380,3 +380,132 @@ export const viewMembershipStatusesByGroup = async (groupId) => {
     params: { groupId }
   });
 };
+
+
+
+/**
+ * ----------------------------------------------------
+ * CREATE AUTHENTICATION SESSION
+ * POST /api/auth/groups/{groupId}/sessions
+ * ----------------------------------------------------
+ *
+ * @param {Number} groupId
+ *
+ * @returns {
+ *   sessionId,
+ *   groupId,
+ *   authType,
+ *   status,
+ *   requiredSignatures,
+ *   expiresAt,
+ *   initiator
+ * }
+ */
+export const createAuthSession = async (groupId) => {
+  const token = localStorage.getItem("token");
+
+  return axios.post(
+    `${API_URL}/auth/groups/${groupId}/sessions`,
+    {},
+    {
+      headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    }
+  );
+};
+
+
+/**
+ * ----------------------------------------------------
+ * SIGN AUTHENTICATION SESSION (BIOMETRIC)
+ * PUT /api/auth/sessions/{sessionId}/sign
+ * ----------------------------------------------------
+ *
+ * @param {
+ *   sessionId: Number,
+ *   biometricTemplateBase64: String
+ * }
+ *
+ * @returns {
+ *   sessionId,
+ *   signatureStatus,        // VERIFIED / REJECTED
+ *   sessionStatus,          // ACTIVE / COMPLETED
+ *   verifiedCount,
+ *   requiredCount,
+ *   groupUnlocked,
+ *   signedAt
+ * }
+ */
+export const signAuthSession = async (sessionId,payload) => {
+  const token = localStorage.getItem("token");
+
+  return axios.put(
+    `${API_URL}/auth/sessions/${sessionId}/sign`,
+    payload,
+    {
+      headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+      },
+    }
+  );
+};
+
+
+/**
+ * ----------------------------------------------------
+ * CHECK GROUP ACCESS
+ * GET /api/auth/groups/{groupId}/access
+ * ----------------------------------------------------
+ *
+ * @param {Number} groupId
+ *
+ * @returns Boolean
+ */
+export const isGroupAccessAllowed = async (groupId) => {
+  const token = localStorage.getItem("token");
+
+  return axios.get(
+    `${API_URL}/auth/groups/${groupId}/access`,
+    {
+      headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+      },
+    }
+  );
+};
+
+
+/**
+ * ----------------------------------------------------
+ * UPDATE AUTH INTENT (OPT-IN / OPT-OUT)
+ * PUT /api/auth/groups/{groupId}/auth-intent
+ * ----------------------------------------------------
+ *
+ * @param {
+ *   groupId: Number,
+ *   isWaiting: Boolean
+ * }
+ *
+ * @returns void
+ */
+export const updateAuthIntent = async (groupId, isWaiting) => {
+  const token = localStorage.getItem("token");
+
+  return axios.put(
+    `${API_URL}/auth/groups/${groupId}/auth-intent`,
+    null,
+    {
+      headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+        },
+      params: {
+        isWaiting
+      }
+    }
+  );
+};
