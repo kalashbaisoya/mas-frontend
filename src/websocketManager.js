@@ -4,7 +4,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
 const API_URL =
-  process.env.REACT_APP_API_URL || 'http://10.145.90.153:8082/backend';
+  process.env.REACT_APP_API_URL || 'http://10.14.75.10:8082/backend';
 
 let wsClient = null;
 
@@ -165,7 +165,7 @@ export const disconnectWebSocket = () => {
 // import SockJS from 'sockjs-client';
 // import { Client } from '@stomp/stompjs';
 
-// const API_URL = process.env.REACT_APP_API_URL || 'http://10.145.90.153:8082/backend';
+// const API_URL = process.env.REACT_APP_API_URL || 'http://10.14.75.10:8082/backend';
 
 // let wsClient = null;
 // const subscriptions = new Map();
@@ -279,7 +279,7 @@ export const disconnectWebSocket = () => {
 // import './polyfills';
 // import { Client } from '@stomp/stompjs';
 
-// const API_URL = import.meta.env.VITE_API_URL || 'http://10.145.90.153:8082';
+// const API_URL = import.meta.env.VITE_API_URL || 'http://10.14.75.10:8082';
 
 // let wsClient = null;
 // const subscriptions = new Map();

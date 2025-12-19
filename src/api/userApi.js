@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://10.145.90.153:8082/backend/api';
+const API_URL = 'http://10.14.75.10:8082/backend/api';
 
 // used to get all group info
 export const viewAllActiveGroups = async () => {
