@@ -7,7 +7,8 @@ import {
   downloadDocument,
   uploadDocument,
   viewMyRemoveFromGroupRequests,
-  sendRemoveRequest,viewMembershipStatusesByGroup,
+  sendRemoveRequest,viewMembershipStatusesByGroup, 
+  createAuthSession,signAuthSession,isGroupAccessAllowed,updateAuthIntent,
 } from '../api/memberApi';
 import { AuthContext } from '../contexts/AuthContext';
 import { createWebSocketClient } from '../websocketService';
@@ -16,7 +17,10 @@ import {
   subscribeToGroupPresence,
   unsubscribeFromGroupPresence,
   disconnectWebSocket,
+    subscribeToGroupAuthState, unsubscribeFromGroupAuthState
+
 } from '../websocketManager';
+  import { captureBiometric } from '../api/api.js';
 
 
 const useMemberDashboard = () => {
@@ -39,6 +43,7 @@ const useMemberDashboard = () => {
   const wsClientRef = useRef(null);
   
 const [presenceByGroup, setPresenceByGroup] = useState({});
+  const [authStateByGroup, setAuthStateByGroup] = useState({});
 
 useEffect(() => {
   const token = localStorage.getItem('token');
@@ -264,6 +269,144 @@ useEffect(() => {
     ).length;
   };
 
+      const handleSignAuthSession = async (sessionId) => {
+        console.group("🔐 handleSignAuthSession");
+        console.log("▶ sessionId:", sessionId);
+  
+        try {
+          setLoading(true);
+  
+          // -----------------------------
+          // Step 0: Validate sessionId
+          // -----------------------------
+          if (!sessionId) {
+            throw new Error("Missing sessionId");
+          }
+  
+          // -----------------------------
+          // Step 1: Capture biometric
+          // -----------------------------
+          console.log("🧬 Capturing biometric...");
+  
+          const bioResponse = await captureBiometric();
+  
+          console.log("🧬 Biometric raw response:", {
+            status: bioResponse?.status,
+            keys: Object.keys(bioResponse?.data || {}),
+          });
+  
+          const biometricTemplateBase64 =
+            bioResponse?.data?.template;
+  
+          if (!biometricTemplateBase64) {
+            console.error("❌ biometricTemplateBase64 missing", bioResponse?.data);
+            throw new Error("Biometric capture failed");
+          }
+  
+          console.log(
+            "✅ Biometric captured (length):",
+            biometricTemplateBase64.length
+          );
+  
+          // -----------------------------
+          // Step 2: Sign authentication session
+          // -----------------------------
+          console.log("🔐 Signing authentication session...");
+          const payload = {
+            biometricTemplateBase64: biometricTemplateBase64,
+          };
+          const signData = await signAuthSession(sessionId,payload);
+  
+          console.log("✅ Authentication Response:",signData?.data);
+  
+          if (!signData) {
+            throw new Error("Empty sign response");
+          }
+  
+          // ✅ STORE AUTH STATE PER GROUP
+          setAuthStateByGroup((prev) => ({
+            ...prev,
+            [viewDocumentsGroupId]: {
+              ...prev[viewDocumentsGroupId],
+              ...signData,              // sessionStatus, verifiedCount, etc.
+            },
+          }));
+  
+        } catch (err) {
+          console.error("❌ handleSignAuthSession error:", err);
+  
+          setError(
+            err?.response?.data?.message ||
+            err?.message ||
+            "Authentication failed"
+          );
+        } finally {
+          setLoading(false);
+          console.groupEnd();
+        }
+      };
+  
+  
+      const handleCreateAuthSession = async (groupId, authType) => {
+        try {
+          setLoading(true);
+          const response = await createAuthSession(groupId);
+  
+          alert('Auth session created');
+  
+          // Subscribe to live auth-state updates (except TYPE_A)
+          if (authType !== 'TYPE_A') {
+            subscribeToGroupAuthState(groupId, (payload) => {
+              setAuthStateByGroup((prev) => ({
+                ...prev,
+                [groupId]: payload,
+              }));
+            });
+          }
+  
+          return response.data;
+        } catch (err) {
+          console.error(err);
+          setError('Failed to create auth session');
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      const handleUpdateAuthIntent = async (sessionId, intent) => {
+        try {
+          setLoading(true);
+          await updateAuthIntent(sessionId, intent); // ALLOW / DENY
+        } catch (err) {
+          console.error(err);
+          setError('Failed to update auth intent');
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      const checkGroupAccess = async (groupId) => {
+        try {
+          const response = await isGroupAccessAllowed(groupId);
+          return response.data; // true / false
+        } catch (err) {
+          console.error(err);
+          return false;
+        }
+      };
+  
+      const cleanupAuthSubscription = (groupId) => {
+        unsubscribeFromGroupAuthState(groupId);
+        setAuthStateByGroup((prev) => {
+          const copy = { ...prev };
+          delete copy[groupId];
+          return copy;
+        });
+      };
+  
+  
+  
+
 
   return {
     groups,
@@ -297,6 +440,13 @@ useEffect(() => {
     setViewRemoveRequests,
     setRemoveRequestGroupId,
     getPendingRemoveRequestsCount,
+    authStateByGroup,
+
+    handleCreateAuthSession,
+    handleSignAuthSession,
+    handleUpdateAuthIntent,
+    checkGroupAccess,
+    cleanupAuthSubscription, handleViewDocumentsClick,
   };
 };
 

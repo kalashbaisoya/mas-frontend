@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {  useEffect } from 'react';
 import useMemberDashboard from '../hooks/useMemberDashboard';
 import GroupCard from '../components/MemberDashboard/GroupCard';
 import LoadingOverlay from '../components/MemberDashboard/LoadingOverlay';
@@ -26,7 +26,7 @@ const MemberDashboard = () => {
     file,
     handleToggleConnection,
     handleViewMembersClick,
-    handleViewDocumentsClick,
+    // handleViewDocumentsClick,
     handleViewRemoveRequestsClick,
     handleSendRemoveRequestClick,
     handleUploadDocument,
@@ -39,32 +39,73 @@ const MemberDashboard = () => {
     setViewDocumentsGroupId,
     setViewRemoveRequests,
     setRemoveRequestGroupId,
-    getPendingRemoveRequestsCount,presenceByGroup
+    getPendingRemoveRequestsCount,presenceByGroup,
+    authStateByGroup,
+
+    handleCreateAuthSession,
+    handleSignAuthSession,
+    checkGroupAccess,
+    handleUpdateAuthIntent,
+    cleanupAuthSubscription, handleViewDocumentsClick,
   } = useMemberDashboard();
+
+  useEffect(() => {
+    return () => {
+      if (viewDocumentsGroupId) {
+        handleUpdateAuthIntent(viewDocumentsGroupId, false);
+        cleanupAuthSubscription(viewDocumentsGroupId);
+      }
+    };
+  }, [viewDocumentsGroupId]);
+
+    const handleOpenDocuments = async (groupId) => {
+    try {
+      // Step 1: Opt-in to auth intent
+      await handleUpdateAuthIntent(groupId, true);
+
+      // Step 2: Create the auth session immediately
+      // const session = await handleCreateAuthSession(groupId);
+
+      // Step 3: Open the modal
+      setViewDocumentsGroupId(groupId);
+    } catch (err) {
+      console.error("Failed to initialize document access", err);
+      alert("Failed to start authentication. Please try again.");
+    }
+  };
+
+  const handleCloseDocuments = async (groupId) => {
+    if (groupId) {
+      await handleUpdateAuthIntent(groupId, false);
+      cleanupAuthSubscription(viewDocumentsGroupId);
+    }
+    setViewDocumentsGroupId(null);
+  };
+
 
 return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Member Dashboard</h1>
 
       <div className="flex justify-between items-center mb-6">
-        <button
+        {/* <button
           onClick={handleToggleConnection}
           className={`px-4 py-2 rounded-lg text-white transition-colors ${
             isConnected ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
           }`}
         >
           {isConnected ? 'Disconnect' : 'Connect to Real-Time Updates'}
-        </button>
+        </button> */}
       </div>
 
       {error && <ErrorAlert message={error} />}
       {loading && <LoadingOverlay />}
 
-      {!isConnected && (
+      {/* {!isConnected && (
         <div className="mb-6 p-4 bg-yellow-100 text-yellow-700 rounded-lg shadow">
           Not connected to real-time updates. Click the button to connect.
         </div>
-      )}
+      )} */}
 
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
@@ -84,7 +125,7 @@ return (
               group={group}
               pendingCount={getPendingRemoveRequestsCount(group.groupId)}
               onViewMembers={() => handleViewMembersClick(group.groupId)}
-              onViewDocuments={() => handleViewDocumentsClick(group.groupId)}
+              onViewDocuments={() => handleOpenDocuments(group.groupId)}
               onRequestRemoval={() => handleSendRemoveRequestClick(group.groupId)}
             />
           ))}
@@ -110,12 +151,20 @@ return (
         <DocumentsModal
           groupId={viewDocumentsGroupId}
           documentsList={documents[viewDocumentsGroupId] || []}
-          groupName={groups.find((g) => g.groupId === viewDocumentsGroupId)?.groupName}
-          onClose={() => setViewDocumentsGroupId(null)}
+          groupName={groups.find(g => g.groupId === viewDocumentsGroupId)?.groupName}
+
+          authState={authStateByGroup[viewDocumentsGroupId]}
+
+          onCreateAuthSession={handleCreateAuthSession}
+          onSignAuthSession={handleSignAuthSession}
+          checkGroupAccess={checkGroupAccess}
+
+          onFetchDocuments={handleViewDocumentsClick}
+          onClose={handleCloseDocuments}
           file={file}
           accessType={accessType}
           onFileChange={handleFileChange}
-          setAccessType={setAccessType}
+          // setAccessType={setAccessType}
           onUpload={handleUploadDocument}
           onDownload={handleDownloadDocument}
           loading={loading}

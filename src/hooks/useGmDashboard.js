@@ -149,9 +149,9 @@ const useGmDashboard = () => {
         const payload = {
           biometricTemplateBase64: biometricTemplateBase64,
         };
-        const signResponse = await signAuthSession(sessionId,payload);
+        const signData = await signAuthSession(sessionId,payload);
 
-        console.log("✅ Authentication Response:",signResponse?.data);
+        console.log("✅ Authentication Response:",signData?.data);
 
         if (!signData) {
           throw new Error("Empty sign response");
@@ -160,8 +160,8 @@ const useGmDashboard = () => {
         // ✅ STORE AUTH STATE PER GROUP
         setAuthStateByGroup((prev) => ({
           ...prev,
-          [groupId]: {
-            ...prev[groupId],
+          [viewDocumentsGroupId]: {
+            ...prev[viewDocumentsGroupId],
             ...signData,              // sessionStatus, verifiedCount, etc.
           },
         }));

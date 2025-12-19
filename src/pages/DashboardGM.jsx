@@ -44,9 +44,10 @@ const {
     handleSignAuthSession,
     checkGroupAccess,
     handleUpdateAuthIntent,
-    cleanupAuthSubscription, handleViewDocumentsClick
+    cleanupAuthSubscription, handleViewDocumentsClick,
+    viewGroupQuorumK, handleUpdateQuorumKForTypeD, viewGroupType,
   } = useGmDashboard() ;
-
+  // console.log('[GMDashboard]viewGroupQuorumK, viewGroupType data for groupId:',viewGroupQuorumK,viewGroupType, groupId);
   useEffect(() => {
   return () => {
     if (viewDocumentsGroupId) {
@@ -126,6 +127,10 @@ const {
           onSuspend={handleSuspendMember}
           onUnsuspend={handleUnsuspendMember}
           onRemove={handleRemoveMember}
+          quorumK={viewGroupQuorumK}
+          onUpdateQuorumKForTypeD={handleUpdateQuorumKForTypeD}
+          groupType={viewGroupType}
+
         />
       )}
 
