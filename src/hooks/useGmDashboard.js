@@ -18,6 +18,7 @@ import {
   downloadDocument,
   uploadDocument, viewMyMembershipsGroupDetails,viewMembershipStatusesByGroup,
   createAuthSession,signAuthSession,isGroupAccessAllowed,updateAuthIntent
+  ,updateQuorumKforGroupD,
 } from '../api/gmApi'; // Updated import to include document APIs
   import { captureBiometric } from '../api/api.js';
 
@@ -53,6 +54,10 @@ const useGmDashboard = () => {
   const [presenceByGroup, setPresenceByGroup] = useState({});
     // 🔐 Auth session state per group
   const [authStateByGroup, setAuthStateByGroup] = useState({});
+
+  const [viewGroupQuorumK,setGroupQuorumK] = useState(null);
+  const [viewGroupType,setGroupType] = useState(null);
+
 
 
 
@@ -234,7 +239,49 @@ const useGmDashboard = () => {
     };
 
 
+    const handleUpdateQuorumKForTypeD =async (quorumK) => {
+      try {
+        const payload = {
+            quorumK : quorumK
+        };
+        const response = await updateQuorumKforGroupD(viewDetailsGroupId,payload );
+        handleViewQuorumKAndGroupType(groupId);
+        return response.data;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    };
 
+    
+  const handleViewQuorumKAndGroupType = (groupId) => {
+    try {
+      console.debug('[handleViewQuorumKAndGroupType] groupId:', groupId);
+      console.debug('[handleViewQuorumKAndGroupType] groups:', groups);
+
+      const group = groups.find((g) => g.groupId === groupId);
+
+      if (!group) {
+        console.error('[handleViewQuorumKAndGroupType] Group not found:', groupId);
+        return;
+      }
+
+      console.debug('[handleViewQuorumKAndGroupType] Found group:', group);
+
+      setGroupQuorumK(group.quorumK ?? null);
+      setGroupType(group.groupAuthType ?? null);
+
+      console.debug('[handleViewQuorumKAndGroupType] State updated:', {
+        quorumK: group.quorumK,
+        groupType: group.groupAuthType,
+      });
+    } catch (error) {
+      console.error('[handleViewQuorumKAndGroupType] Error:', error);
+      setError(`Failed to fetch quorumK for group ${groupId}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
@@ -352,6 +399,7 @@ const useGmDashboard = () => {
   // Handle view details modal open
   const handleViewDetailsClick = async (groupId) => {
     setViewDetailsGroupId(groupId);
+    handleViewQuorumKAndGroupType(groupId);
     await fetchMembers(groupId);
 
     //get and set initial presence of members
@@ -602,7 +650,8 @@ const useGmDashboard = () => {
     handleSignAuthSession,
     handleUpdateAuthIntent,
     checkGroupAccess,
-    cleanupAuthSubscription, handleViewDocumentsClick
+    cleanupAuthSubscription, handleViewDocumentsClick,
+    viewGroupQuorumK, handleUpdateQuorumKForTypeD,viewGroupType
   };
 };
 

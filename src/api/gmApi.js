@@ -509,3 +509,36 @@ export const updateAuthIntent = async (groupId, isWaiting) => {
     }
   );
 };
+
+
+
+/**
+ * ------------------------------------------------------
+ * UPDATE VALUE OF K (FOR Type D Group)
+ * PUT /api/group/{groupId}/quorum-k
+ * -----------------------------------------------------
+ * @field {
+ *    groupId: Number // PathVariable
+ * }
+ * @requires {
+ *    quorumK : Integer
+ * 
+ * }
+ * 
+ * @returns ResponseEntity<String> value "QuorumK set successfully for Group D"
+ */
+
+export const updateQuorumKforGroupD = async(groupId, payload) => {
+  const token = localStorage.getItem("token");
+
+  return axios.put(
+    `${API_URL}/group/${groupId}/quorum-k`,
+    payload,
+    {
+      headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+        }
+    }
+  );
+};
